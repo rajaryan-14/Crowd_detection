@@ -134,6 +134,7 @@ myenv/
 # Video files
 video/*
 !video/14931663_1080_1920_60fps.mp4
+!video/16006014_3840_2160_30fps.mp4
 
 # YOLO config and weights
 YOLOv3-tiny/
@@ -141,7 +142,9 @@ YOLOv4-tiny/
 YOLOv4/
 
 # Processed data files
-processed_data/
+processed_data/*
+!processed_data/
+!processed_data/*.mp4
 movement_data.csv
 crowd_data.csv
 video_data.json

@@ -2,7 +2,7 @@ import datetime
 
 # Video Path
 VIDEO_CONFIG = {
-	"VIDEO_CAP" : "video/14931663_1080_1920_60fps.mp4",
+	"VIDEO_CAP" : "video/16006014_3840_2160_30fps.mp4",
 	"IS_CAM" : False,
 	"CAM_APPROX_FPS": 3,
 	"HIGH_CAM": False,
@@ -16,6 +16,9 @@ YOLO_CONFIG = {
 }
 # Show individuals detected
 SHOW_PROCESSING_OUTPUT = False
+# Save annotated processing output to a video file
+SAVE_OUTPUT_VIDEO = True
+OUTPUT_VIDEO_PATH = "processed_data/detected_output_16006014.mp4"
 # Show individuals detected
 SHOW_DETECT = True
 # Data record

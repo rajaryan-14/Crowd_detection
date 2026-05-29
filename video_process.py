@@ -3,6 +3,7 @@ import datetime
 import numpy as np
 import imutils
 import cv2
+import os
 import time
 from math import ceil
 from scipy.spatial.distance import euclidean
@@ -10,7 +11,7 @@ from tracking import detect_human
 from util import rect_distance, progress, kinetic_energy
 from colors import RGB_COLORS
 from config import SHOW_DETECT, DATA_RECORD, RE_CHECK, RE_START_TIME, RE_END_TIME, SD_CHECK, SHOW_VIOLATION_COUNT, SHOW_TRACKING_ID, SOCIAL_DISTANCE,\
-	SHOW_PROCESSING_OUTPUT, YOLO_CONFIG, VIDEO_CONFIG, DATA_RECORD_RATE, ABNORMAL_CHECK, ABNORMAL_ENERGY, ABNORMAL_THRESH, ABNORMAL_MIN_PEOPLE
+	SHOW_PROCESSING_OUTPUT, SAVE_OUTPUT_VIDEO, OUTPUT_VIDEO_PATH, YOLO_CONFIG, VIDEO_CONFIG, DATA_RECORD_RATE, ABNORMAL_CHECK, ABNORMAL_ENERGY, ABNORMAL_THRESH, ABNORMAL_MIN_PEOPLE
 from deep_sort import nn_matching
 from deep_sort.detection import Detection
 from deep_sort.tracker import Tracker
@@ -62,6 +63,7 @@ def video_process(cap, frame_size, net, ln, encoder, tracker, movement_data_writ
 
 	RE = False
 	ABNORMAL = False
+	output_video = None
 
 	while True:
 		(ret, frame) = cap.read()
@@ -89,6 +91,15 @@ def video_process(cap, frame_size, net, ln, encoder, tracker, movement_data_writ
 
 		# Resize Frame to given size
 		frame = imutils.resize(frame, width=frame_size)
+
+		if SAVE_OUTPUT_VIDEO and output_video is None:
+			output_dir = os.path.dirname(OUTPUT_VIDEO_PATH)
+			if output_dir and not os.path.exists(output_dir):
+				os.makedirs(output_dir)
+			output_fps = VIDEO_CONFIG["CAM_APPROX_FPS"] if IS_CAM else VID_FPS / DATA_RECORD_FRAME
+			(height, width) = frame.shape[:2]
+			fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+			output_video = cv2.VideoWriter(OUTPUT_VIDEO_PATH, fourcc, output_fps, (width, height))
 
 		# Get current time
 		current_datetime = datetime.datetime.now()
@@ -242,6 +253,9 @@ def video_process(cap, frame_size, net, ln, encoder, tracker, movement_data_writ
 		else:
 			progress(display_frame_count)
 
+		if output_video:
+			output_video.write(frame)
+
 		# Press 'Q' to stop the video display
 		if cv2.waitKey(1) & 0xFF == ord('q'):
 			# Record the movement when video ends
@@ -251,5 +265,7 @@ def video_process(cap, frame_size, net, ln, encoder, tracker, movement_data_writ
 				_calculate_FPS()
 			break
 	
+	if output_video:
+		output_video.release()
 	cv2.destroyAllWindows()
 	return VID_FPS
